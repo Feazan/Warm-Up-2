@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tic Tac Toe</title>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Tic Tac Toe</h1>
+    <h4>Hello <%= name %>,  <%= moment().subtract(10, 'days').calendar(); %></h4>
+    <div>
+        <table id='test1'>
+            <tr id='test2'>
+                <td id='0'></td>
+                <td id='1' class='vertical'></td>
+                <td id='2'></td>
+            </tr>
+
+            <tr>
+                <td id='3' class='horizantal'></td>
+                <td id='4' class='vertical horizantal'></td>
+                <td id='5' class='horizantal'></td>
+            </tr>
+
+            <tr>
+                <td id='6'></td>
+                <td id='7' class='vertical'></td>
+                <td id='8'></td>
+            </tr>
+        </table>
+    </div>
+
+    <h4 id='winnerField'>Winner: </h4>
+</body>
+<script src="game.js"></script>
+</html>

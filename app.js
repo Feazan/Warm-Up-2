@@ -4,7 +4,7 @@ var app = express();
 var bodyParser = require('body-parser');
 var jParser = bodyParser.json();
 app.use(express.static('public'));
-app.use(express.static('controllers'));
+app.use(express.static('model'));
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
@@ -40,6 +40,16 @@ function determineWinner(grid) {
 
 app.get('/', function(req, res) {
 	res.render('home');
+});
+
+app.get('/adduser', function(req, res) {
+	res.render('register');
+});
+
+app.post('/adduser', function(req, res) {
+	console.log('adduser: ', req.body);
+	// TODO: Should not render ttt, user must first be verified
+	res.render('ttt', { name: req.body.username, moment: moment });
 });
 
 app.get('/ttt', function(req, res) {

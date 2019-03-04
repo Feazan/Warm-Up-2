@@ -1,6 +1,9 @@
 var express = require('express'),
 	nodemailer = require('nodemailer'),
-	randomstring = require('randomstring');
+	randomstring = require('randomstring'),
+	bodyParser = require('body-parser'),
+	jParser = bodyParser.json();
+
 var router = express.Router();
 var User = require('../model/users');
 
@@ -8,7 +11,7 @@ router.get('/adduser', function(req, res) {
 	res.render('register');
 });
 
-router.post('/adduser', function(req, res) {
+router.post('/adduser', jParser, function(req, res) {
 	console.log('adduser: ', req.body);
 	var username = req.body.username;
 	var password = req.body.password;
@@ -25,34 +28,34 @@ router.post('/adduser', function(req, res) {
 			console.log(newlyCreated);
 			// Send verification email
 			// create reusable transporter object using the default SMTP transport
-			let transporter = nodemailer.createTransport({
-				service: 'Gmail',
-				port: 587,
-				secure: false, // true for 465, false for other ports
-				auth: {
-					user: 'TODO', // generated ethereal user
-					pass: 'TODO' // generated ethereal password
-				},
-				tls: {
-					rejectUnauthorized: false
-				}
-			});
+			// let transporter = nodemailer.createTransport({
+			// 	service: 'Gmail',
+			// 	port: 587,
+			// 	secure: false, // true for 465, false for other ports
+			// 	auth: {
+			// 		user: 'TODO', // generated ethereal user
+			// 		pass: 'TODO' // generated ethereal password
+			// 	},
+			// 	tls: {
+			// 		rejectUnauthorized: false
+			// 	}
+			// });
 
-			// setup email data with unicode symbols
-			let mailOptions = {
-				from: '"Tic Tac Toe Verification" <chrismurphyslaw1@gmail.com>', // sender address
-				to: email, // list of receivers
-				subject: 'TTT Verification Code', // Subject line
-				text: 'Hello world', // plain text body
-				html: '<b>Your Verification Code is: </b>' + secretToken // html body
-			};
+			// // setup email data with unicode symbols
+			// let mailOptions = {
+			// 	from: '"Tic Tac Toe Verification" <chrismurphyslaw1@gmail.com>', // sender address
+			// 	to: email, // list of receivers
+			// 	subject: 'TTT Verification Code', // Subject line
+			// 	text: 'Hello world', // plain text body
+			// 	html: '<b>Your Verification Code is: </b>' + secretToken // html body
+			// };
 
-			// send mail with defined transport object
-			let info = await transporter.sendMail(mailOptions);
+			// // send mail with defined transport object
+			// let info = await transporter.sendMail(mailOptions);
 
-			console.log('Message sent: %s', info.messageId);
-			// Preview only available when sending through an Ethereal account
-			console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+			// console.log('Message sent: %s', info.messageId);
+			// // Preview only available when sending through an Ethereal account
+			// console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
 			// TODO: If problem check here
 			res.redirect('verify');
 		}

@@ -33,8 +33,8 @@ router.post('/adduser', jParser, function(req, res) {
 				port: 587,
 				secure: false, // true for 465, false for other ports
 				auth: {
-					user: 'TODO', // generated ethereal user
-					pass: 'TODO' // generated ethereal password
+					user: 'chrismurphyslaw1@gmail.com', // generated ethereal user
+					pass: 'Norman184' // generated ethereal password
 				},
 				tls: {
 					rejectUnauthorized: false
@@ -57,6 +57,7 @@ router.post('/adduser', jParser, function(req, res) {
 			// Preview only available when sending through an Ethereal account
 			console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
 			// TODO: If problem check here
+			// send {status: 'OK'}
 			res.redirect(200, 'verify');
 		}
 	});
@@ -80,6 +81,7 @@ router.post('/verify', jParser, function(req, res) {
 				foundObject.save(function(err) {
 					if (err) console.log(err);
 				});
+				// send {status: 'OK'}
 				res.redirect('login');
 			} else {
 				console.log('KEY NOT FOUND');

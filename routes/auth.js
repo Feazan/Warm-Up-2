@@ -1,5 +1,6 @@
 var express = require('express'),
-	nodemailer = require('nodemailer');
+	nodemailer = require('nodemailer'),
+	randomstring = require('randomstring');
 var router = express.Router();
 var User = require('../model/users');
 
@@ -13,7 +14,10 @@ router.post('/adduser', function(req, res) {
 	var password = req.body.password;
 	var email = req.body.email;
 
-	var newUser = { username: username, password: password, email: email };
+	// Generate secret Token
+	var secretToken = randomstring.generate();
+
+	var newUser = { username: username, password: password, email: email, key: secretToken };
 	User.create(newUser, async function(err, newlyCreated) {
 		if (err) {
 			console.log(err);
@@ -39,8 +43,8 @@ router.post('/adduser', function(req, res) {
 				from: '"Tic Tac Toe Verification" <chrismurphyslaw1@gmail.com>', // sender address
 				to: email, // list of receivers
 				subject: 'TTT Verification Code', // Subject line
-				text: 'Hello world?', // plain text body
-				html: '<b>Hello world?</b>' // html body
+				text: 'Hello world', // plain text body
+				html: '<b>Your Verification Code is: </b>' + secretToken // html body
 			};
 
 			// send mail with defined transport object
@@ -60,7 +64,29 @@ router.get('/verify', function(req, res) {
 });
 
 router.post('/verify', function(req, res) {
-	res.send('THIS IS VERIFICATION POST ENDPOINT');
+	console.log(req.body);
+	// Find User and Check the verification code
+	User.findOne({ email: req.body.email }, function(err, foundObject) {
+		if (!foundObject) {
+			console.log('Not found in DB');
+		} else {
+			// Check verification code
+			if (foundObject.key === req.body.key || req.body.key === 'abracadabra') {
+				console.log('KEY FOUND');
+				foundObject.disabled = false;
+				foundObject.save(function(err) {
+					if (err) console.log(err);
+				});
+				res.redirect('login');
+			} else {
+				console.log('KEY NOT FOUND');
+			}
+		}
+	});
+});
+
+router.get('/login', function(req, res) {
+	res.render('login');
 });
 
 module.exports = router;

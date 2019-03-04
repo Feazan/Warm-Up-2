@@ -5,6 +5,7 @@ var userSchema = new mongoose.Schema({
 	username: String,
 	password: String,
 	email: String,
+	key: String,
 	disabled: { type: Boolean, default: true }
 });
 

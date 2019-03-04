@@ -13,9 +13,11 @@
     "ejs": "^2.6.1",
     "express": "^4.16.4",
     "moment": "^2.24.0",
-    "mongoose": "^5.4.15"
+    "mongoose": "^5.4.15",
+    "nodemailer": "^5.1.1"
   },
   "devDependencies": {
+    "dotenv": "^6.2.0",
     "eslint": "^5.14.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.16.0"

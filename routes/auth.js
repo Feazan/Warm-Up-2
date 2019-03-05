@@ -1,11 +1,28 @@
 var express = require('express'),
 	nodemailer = require('nodemailer'),
 	randomstring = require('randomstring'),
+	passport = require('passport'),
 	bodyParser = require('body-parser'),
-	jParser = bodyParser.json();
+	jParser = bodyParser.json(),
+	LocalStrategy = require('passport-local'),
+	User = require('../model/users');
 
+// require('../passport.js')(passport);
 var router = express.Router();
-var User = require('../model/users');
+router.use(bodyParser.urlencoded({ extended: true }));
+
+router.use(
+	require('express-session')({
+		secret: 'The cake is a lie',
+		resave: false,
+		saveUninitialized: false
+	})
+);
+router.use(passport.initialize());
+router.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser);
+passport.deserializeUser(User.deserializeUser);
 
 router.get('/adduser', function(req, res) {
 	res.render('register');
@@ -20,10 +37,11 @@ router.post('/adduser', jParser, function(req, res) {
 	// Generate secret Token
 	var secretToken = randomstring.generate();
 
-	var newUser = { username: username, password: password, email: email, key: secretToken };
+	var newUser = new User({ username: username, password: password, email: email, key: secretToken });
 	User.create(newUser, async function(err, newlyCreated) {
 		if (err) {
 			console.log(err);
+			res.send({ status: 'ERROR' });
 		} else {
 			console.log(newlyCreated);
 			// Send verification email
@@ -58,7 +76,8 @@ router.post('/adduser', jParser, function(req, res) {
 			console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
 			// TODO: If problem check here
 			// send {status: 'OK'}
-			res.redirect(200, 'verify');
+			res.send({ status: 'OK' });
+			// res.send({ status: 'OK' });
 		}
 	});
 });
@@ -82,7 +101,8 @@ router.post('/verify', jParser, function(req, res) {
 					if (err) console.log(err);
 				});
 				// send {status: 'OK'}
-				res.redirect('login');
+				res.send({ status: 'OK' });
+				// res.redirect('login');
 			} else {
 				console.log('KEY NOT FOUND');
 			}
@@ -93,5 +113,44 @@ router.post('/verify', jParser, function(req, res) {
 router.get('/login', function(req, res) {
 	res.render('login');
 });
+
+router.post('/login', function(req, res) {
+	User.findOne({ username: req.body.username }, function(err, foundObject) {
+		if (!foundObject) {
+			console.log('Not found in DB');
+			res.send({ status: 'ERROR' });
+		} else {
+			// Check verified
+			if (!foundObject.disabled) {
+				if (foundObject.password === req.body.password) {
+					console.log(foundObject);
+					passport.authenticate(function(err) {
+						console.log(err);
+						res.send({ status: 'OK' });
+					});
+				} else {
+					console.log(err);
+					res.send({ status: 'ERROR' });
+				}
+			} else {
+				res.send({ status: 'ERROR' });
+			}
+		}
+	});
+});
+
+router.get('/pass', function(req, res) {
+	res.send({ status: 'OK' });
+});
+router.get('/fail', function(req, res) {
+	res.send({ status: 'ERROR' });
+});
+
+function isLoggedIn(req, res, next) {
+	if (req.isAuthenticated()) {
+		return next();
+	}
+	res.send({ status: 'ERROR' });
+}
 
 module.exports = router;

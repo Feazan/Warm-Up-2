@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+var passportLocalMongoose = require('passport-local-mongoose');
 
 // Schema setup
 var userSchema = new mongoose.Schema({
@@ -9,4 +10,5 @@ var userSchema = new mongoose.Schema({
 	disabled: { type: Boolean, default: true }
 });
 
+userSchema.plugin(passportLocalMongoose);
 module.exports = mongoose.model('User', userSchema);

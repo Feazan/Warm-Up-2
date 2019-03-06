@@ -1,13 +1,16 @@
 var express = require('express'),
 	nodemailer = require('nodemailer'),
 	randomstring = require('randomstring'),
+	User = require('../model/users'),
 	passport = require('passport'),
+	LocalStrategy = require('passport-local').Strategy,
 	bodyParser = require('body-parser'),
 	jParser = bodyParser.json(),
-	LocalStrategy = require('passport-local'),
-	User = require('../model/users');
+	mongoose = require('mongoose');
+// LocalStrategy = require('passport-local'),
 
 // require('../passport.js')(passport);
+mongoose.set('debug', true);
 var router = express.Router();
 router.use(bodyParser.urlencoded({ extended: true }));
 
@@ -37,8 +40,8 @@ router.post('/adduser', jParser, function(req, res) {
 	// Generate secret Token
 	var secretToken = randomstring.generate();
 
-	var newUser = new User({ username: username, password: password, email: email, key: secretToken });
-	User.create(newUser, async function(err, newlyCreated) {
+	var newUser = new User({ username: username, email: email, key: secretToken });
+	User.register(newUser, password, async function(err, newlyCreated) {
 		if (err) {
 			console.log(err);
 			res.send({ status: 'ERROR' });
@@ -114,37 +117,46 @@ router.get('/login', function(req, res) {
 	res.render('login');
 });
 
-router.post('/login', function(req, res) {
-	User.findOne({ username: req.body.username }, function(err, foundObject) {
-		if (!foundObject) {
-			console.log('Not found in DB');
-			res.send({ status: 'ERROR' });
-		} else {
-			// Check verified
-			if (!foundObject.disabled) {
-				if (foundObject.password === req.body.password) {
-					console.log(foundObject);
-					passport.authenticate(function(err) {
-						console.log(err);
-						res.send({ status: 'OK' });
-					});
-				} else {
-					console.log(err);
-					res.send({ status: 'ERROR' });
-				}
-			} else {
-				res.send({ status: 'ERROR' });
-			}
-		}
-	});
-});
+// router.post('/login', function(req, res) {
+// 	User.findOne({ username: req.body.username }, function(err, foundObject) {
+// 		if (!foundObject) {
+// 			console.log('Not found in DB');
+// 			res.send({ status: 'ERROR' });
+// 		} else {
+// 			// Check verified
+// 			if (!foundObject.disabled) {
+// 				if (foundObject.password === req.body.password) {
+// 					console.log(foundObject);
+// 					// Other example on line 78
+// 					try {
+// 						passport.authenticate(function(err) {
+// 							console.log(err);
+// 							res.send({ status: 'OK' });
+// 						});
+// 					} catch (e) {
+// 						console.log('aah');
+// 						console.log(e.toString());
+// 					}
+// 					console.log('boo');
+// 				} else {
+// 					console.log(err);
+// 					res.send({ status: 'ERROR' });
+// 				}
+// 			} else {
+// 				res.send({ status: 'ERROR' });
+// 			}
+// 		}
+// 	});
+// });
 
-router.get('/pass', function(req, res) {
-	res.send({ status: 'OK' });
-});
-router.get('/fail', function(req, res) {
-	res.send({ status: 'ERROR' });
-});
+router.post(
+	'/login',
+	passport.authenticate('local', {
+		successRedirect: '/ttt',
+		failureRedirect: '/'
+	}),
+	function(req, res) {}
+);
 
 function isLoggedIn(req, res, next) {
 	if (req.isAuthenticated()) {
